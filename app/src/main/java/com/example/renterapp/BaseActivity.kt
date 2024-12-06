@@ -7,12 +7,19 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import com.example.renterapp.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 open class BaseActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
+
+    val db = Firebase.firestore
+
+    var userId = ""
+    var user: User? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,9 +69,23 @@ open class BaseActivity : AppCompatActivity() {
                 }
             }
             R.id.miLogout -> {
-
+                auth.signOut()
+                if(this is WishlistActivity) {
+                    finish()
+                }
+                setAppBarTitle()
             }
         }
         return true
     }
+
+    protected open fun setAppBarTitle() {
+        invalidateOptionsMenu()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        invalidateOptionsMenu()
+    }
+
 }
