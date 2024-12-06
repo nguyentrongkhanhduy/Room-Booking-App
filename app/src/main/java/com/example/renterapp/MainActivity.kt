@@ -21,8 +21,14 @@ class MainActivity : BaseActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
         auth = Firebase.auth
 
+        if(auth.currentUser == null){
+            supportActionBar!!.setTitle("Welcome to Renter App!")
+        } else {
+            supportActionBar!!.setTitle("Welcome back, Eddie!")
+        }
 
 
     }

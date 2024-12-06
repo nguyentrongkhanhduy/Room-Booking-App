@@ -6,12 +6,8 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
@@ -53,16 +49,17 @@ open class BaseActivity : AppCompatActivity() {
             android.R.id.home -> {
                 finish()
             }
-
             R.id.miWishList -> {
-                if(this is Wishlist) return true
+                if(this is WishlistActivity) return true
 
-                Intent(this, Wishlist::class.java).also {
+                Intent(this, WishlistActivity::class.java).also {
                     startActivity(it)
                 }
             }
             R.id.miLogin -> {
-
+                Intent(this, LoginActivity::class.java).also {
+                    startActivity(it)
+                }
             }
             R.id.miLogout -> {
 

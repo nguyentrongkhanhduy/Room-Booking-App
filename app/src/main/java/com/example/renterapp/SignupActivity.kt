@@ -5,14 +5,20 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.renterapp.databinding.ActivityWishlistBinding
+import com.example.renterapp.databinding.ActivitySignupBinding
 
-class Wishlist : BaseActivity() {
-    private lateinit var binding: ActivityWishlistBinding
+class SignupActivity : AppCompatActivity() {
+    private lateinit var binding: ActivitySignupBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityWishlistBinding.inflate(layoutInflater)
+        binding = ActivitySignupBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        supportActionBar!!.hide()
+
+        binding.btnBack.setOnClickListener {
+            finish()
+        }
     }
 }
