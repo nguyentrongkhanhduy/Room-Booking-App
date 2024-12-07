@@ -15,6 +15,8 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
 import com.google.type.LatLng
 
 class LocationUtils(val context: Context) {
@@ -78,6 +80,8 @@ class LocationUtils(val context: Context) {
         if (hasLocationPermission(context)) {
             fusedLocationClient.lastLocation.addOnSuccessListener {
                 if (it != null) {
+                    val tempLatLng =
+                        com.google.android.gms.maps.model.LatLng(it.latitude, it.longitude)
                     location.updateLocation(it.latitude, it.longitude)
                 } else {
                     Toast.makeText(context, "Fetching location...", Toast.LENGTH_LONG).show()

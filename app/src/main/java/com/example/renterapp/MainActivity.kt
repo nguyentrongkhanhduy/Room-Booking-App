@@ -18,6 +18,7 @@ import com.example.renterapp.util.LocationUtils
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -45,6 +46,9 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         if (!checkLocationPermission) {
             requestLocationPermission()
         }
+
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.fragMap) as SupportMapFragment
+        mapFragment.getMapAsync(this)
     }
 
     private fun requestLocationPermission() {
@@ -127,10 +131,9 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
             googleMap.isMyLocationEnabled = true
             googleMap.uiSettings.isMyLocationButtonEnabled = true
             googleMap.uiSettings.isZoomControlsEnabled = true
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(43.678684, -79.372565), 12f)) //Toronto
         }
 
-        locationUtils.fetchCurrentLocation(location)
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(location.latitude, location.longitude), 15f))
     }
 
 }
