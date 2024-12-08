@@ -5,10 +5,4 @@ class Location(var latitude: Double = 0.0, var longitude: Double = 0.0) {
         this.latitude = latitude
         this.longitude = longitude
     }
-
-    override fun toString(): String {
-
-        return "Location(latitude=$latitude, longitude=$longitude)"
-
-    }
 }

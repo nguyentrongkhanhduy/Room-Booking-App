@@ -3,6 +3,7 @@ package com.example.renterapp
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -13,6 +14,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.renterapp.databinding.ActivityMainBinding
 import com.example.renterapp.model.Location
+import com.example.renterapp.model.Property
 import com.example.renterapp.model.User
 import com.example.renterapp.util.LocationUtils
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -20,6 +22,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -32,6 +35,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
     private lateinit var googleMap: GoogleMap
     private lateinit var location: Location
 
+    val propertyListDisplay = mutableListOf<Property>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +53,8 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.fragMap) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        getAllProperty()
     }
 
     private fun requestLocationPermission() {
@@ -131,9 +137,28 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
             googleMap.isMyLocationEnabled = true
             googleMap.uiSettings.isMyLocationButtonEnabled = true
             googleMap.uiSettings.isZoomControlsEnabled = true
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(43.678684, -79.372565), 12f)) //Toronto
+
+            locationUtils.fetchCurrentLocation(location) {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(it, 12f))
+            }
+
         }
 
     }
 
+    private fun getAllProperty() {
+        db.collection("property").get().addOnSuccessListener {
+            for (document in it) {
+                try {
+                    val property = document.toObject(Property::class.java)
+                    val latLngProperty = LatLng(property.location.latitude, property.location.longitude)
+                    googleMap.clear()
+                    googleMap.addMarker(MarkerOptions().position(latLngProperty).icon(locationUtils.createCustomMarker(this, "$${property.price} CAD")))
+                } catch (e: Exception) {
+                    Toast.makeText(this, e.localizedMessage, Toast.LENGTH_LONG).show()
+                    Log.d("Debug", e.localizedMessage)
+                }
+            }
+        }
+    }
 }

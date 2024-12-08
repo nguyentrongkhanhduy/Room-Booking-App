@@ -4,10 +4,10 @@ import com.google.firebase.firestore.DocumentId
 
 class Property(
     @DocumentId
-    val id: String = "",
-    val location: Location = Location(),
-    val price: Double = 0.0,
-    val imgUlr: String = "",
-//    val description: String,
+    var id: String = "",
+    var location: Location = Location(),
+    var price: Double = 0.0,
+    var imgUlr: String = "",
+    var description: String = "",
 ) {
 }
