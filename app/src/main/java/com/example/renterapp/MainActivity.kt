@@ -2,12 +2,18 @@ package com.example.renterapp
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
@@ -27,6 +33,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
+import java.util.Locale
 
 class MainActivity : BaseActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityMainBinding
@@ -34,6 +41,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
     private lateinit var locationUtils: LocationUtils
     private lateinit var googleMap: GoogleMap
     private lateinit var location: Location
+    private lateinit var geoCoder: Geocoder
 
     val propertyListDisplay = mutableListOf<Property>()
 
@@ -45,16 +53,16 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         auth = Firebase.auth
         locationUtils = LocationUtils(this)
         location = Location()
+        geoCoder = Geocoder(this, Locale.getDefault())
 
         val checkLocationPermission = locationUtils.hasLocationPermission(this)
         if (!checkLocationPermission) {
             requestLocationPermission()
         }
 
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.fragMap) as SupportMapFragment
+        val mapFragment =
+            supportFragmentManager.findFragmentById(R.id.fragMap) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
-        getAllProperty()
     }
 
     private fun requestLocationPermission() {
@@ -139,26 +147,74 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
             googleMap.uiSettings.isZoomControlsEnabled = true
 
             locationUtils.fetchCurrentLocation(location) {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(it, 12f))
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(it, 11f))
             }
 
-        }
+            getAllProperty()
 
+            googleMap.setOnMarkerClickListener {
+                showProperty(it.tag as Int)
+                true
+            }
+        }
     }
 
     private fun getAllProperty() {
+        googleMap.clear()
+        propertyListDisplay.clear()
         db.collection("property").get().addOnSuccessListener {
             for (document in it) {
                 try {
                     val property = document.toObject(Property::class.java)
-                    val latLngProperty = LatLng(property.location.latitude, property.location.longitude)
-                    googleMap.clear()
-                    googleMap.addMarker(MarkerOptions().position(latLngProperty).icon(locationUtils.createCustomMarker(this, "$${property.price} CAD")))
+                    propertyListDisplay.add(property)
+                    val latLngProperty =
+                        LatLng(property.location.latitude, property.location.longitude)
+                    val marker = googleMap.addMarker(
+                        MarkerOptions().position(latLngProperty)
+                            .icon(locationUtils.createCustomMarker(this, "$${property.price} CAD"))
+                    )
+                    marker!!.tag = propertyListDisplay.indexOf(property)
                 } catch (e: Exception) {
                     Toast.makeText(this, e.localizedMessage, Toast.LENGTH_LONG).show()
                     Log.d("Debug", e.localizedMessage)
                 }
             }
         }
+    }
+
+    private fun showProperty(position: Int) {
+        Toast.makeText(this, propertyListDisplay.get(position).description, Toast.LENGTH_SHORT)
+            .show()
+        val customDialog = LayoutInflater.from(this).inflate(R.layout.property_detail_layout, null)
+
+        val alertDialog = AlertDialog.Builder(this)
+            .setView(customDialog)
+            .create()
+
+        val address = customDialog.findViewById<TextView>(R.id.tvAddress)
+        val description = customDialog.findViewById<TextView>(R.id.tvDescription)
+        val price = customDialog.findViewById<TextView>(R.id.tvPrice)
+        val image = customDialog.findViewById<ImageView>(R.id.ivRoom)
+
+
+        val searchResult = geoCoder.getFromLocation(
+            propertyListDisplay.get(position).location.latitude,
+            propertyListDisplay.get(position).location.longitude,
+            1
+        )
+        if (searchResult != null && searchResult.isNotEmpty()) {
+            address.text = searchResult[0].getAddressLine(0)
+        }
+        description.text = propertyListDisplay.get(position).description
+        price.text = "$${propertyListDisplay.get(position).price} CAD"
+
+        val btnDismiss = customDialog.findViewById<ImageButton>(R.id.btnClose)
+        btnDismiss.setOnClickListener {
+            alertDialog.dismiss()
+        }
+
+
+
+        alertDialog.show()
     }
 }
