@@ -7,5 +7,6 @@ class User(
     val id: String = "",
     val username: String = "",
     val email: String = "",
+    val wishList: MutableList<String> = mutableListOf()
 ) {
 }

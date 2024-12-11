@@ -48,6 +48,16 @@ open class BaseActivity : AppCompatActivity() {
             menu?.findItem(R.id.miLogin)?.isVisible = false
             menu?.findItem(R.id.miLogout)?.isVisible = true
         }
+
+        if(this is WishlistActivity){
+            val drawable = getDrawable(R.drawable.ic_wishlist_2)
+            drawable?.setTint(Color.parseColor("#cd3362"))
+            menu?.findItem(R.id.miWishList)?.icon = drawable
+        } else {
+            val drawable = getDrawable(R.drawable.ic_wishlist)
+            drawable?.setTint(Color.parseColor("#000000"))
+            menu?.findItem(R.id.miWishList)?.icon = drawable
+        }
         return true
     }
 
@@ -87,5 +97,4 @@ open class BaseActivity : AppCompatActivity() {
         super.onResume()
         invalidateOptionsMenu()
     }
-
 }

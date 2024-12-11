@@ -1,23 +1,18 @@
 package com.example.renterapp
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.renterapp.databinding.ActivityMainBinding
 import com.example.renterapp.model.Location
 import com.example.renterapp.model.Property
@@ -32,7 +27,6 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
-import com.google.firebase.firestore.firestore
 import java.util.Locale
 
 class MainActivity : BaseActivity(), OnMapReadyCallback {
@@ -44,6 +38,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
     private lateinit var geoCoder: Geocoder
 
     val propertyListDisplay = mutableListOf<Property>()
+    val wishList: MutableList<String> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,6 +110,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
     override fun onResume() {
         super.onResume()
         setAppBarTitle()
+        getCurrentUserInfo()
     }
 
     override fun setAppBarTitle() {
@@ -182,10 +178,12 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         }
     }
 
+    private fun checkFavourite(): Boolean {
+        return false
+    }
+
     private fun showProperty(position: Int) {
-        Toast.makeText(this, propertyListDisplay.get(position).description, Toast.LENGTH_SHORT)
-            .show()
-        val customDialog = LayoutInflater.from(this).inflate(R.layout.property_detail_layout, null)
+        val customDialog = LayoutInflater.from(this).inflate(R.layout.property_detail_popup_layout, null)
 
         val alertDialog = AlertDialog.Builder(this)
             .setView(customDialog)
@@ -195,7 +193,6 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         val description = customDialog.findViewById<TextView>(R.id.tvDescription)
         val price = customDialog.findViewById<TextView>(R.id.tvPrice)
         val image = customDialog.findViewById<ImageView>(R.id.ivRoom)
-
 
         val searchResult = geoCoder.getFromLocation(
             propertyListDisplay.get(position).location.latitude,
@@ -213,8 +210,49 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
             alertDialog.dismiss()
         }
 
+        val btnFavorite = customDialog.findViewById<ImageButton>(R.id.btnFavorite)
 
+        if(auth.currentUser != null){
+            if (wishList.contains(propertyListDisplay.get(position).id)) {
+                btnFavorite.setImageResource(R.drawable.ic_fav_2)
+            } else {
+                btnFavorite.setImageResource(R.drawable.ic_fav)
+            }
+        }
+
+        btnFavorite.setOnClickListener {
+            if (auth.currentUser == null) {
+                val intent = Intent(this, LoginActivity::class.java)
+                startActivity(intent)
+            } else {
+                if (wishList.contains(propertyListDisplay.get(position).id)) {
+                    wishList.remove(propertyListDisplay.get(position).id)
+                    btnFavorite.setImageResource(R.drawable.ic_fav)
+                    db.collection("user").document(auth.currentUser!!.uid).update("wishList", wishList)
+                    Toast.makeText(this, "Removed from Wishlist", Toast.LENGTH_SHORT).show()
+                } else {
+                    wishList.add(propertyListDisplay.get(position).id)
+                    btnFavorite.setImageResource(R.drawable.ic_fav_2)
+                    db.collection("user").document(auth.currentUser!!.uid).update("wishList", wishList)
+                    Toast.makeText(this, "Added to Wishlist", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        alertDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         alertDialog.show()
+    }
+
+    private fun getCurrentUserInfo() {
+        if (auth.currentUser != null) {
+            db.collection("user").document(auth.currentUser!!.uid).get().addOnSuccessListener {
+                val user = it.toObject(User::class.java)
+                if (user != null) {
+                    wishList.clear()
+                    wishList.addAll(user.wishList)
+                }
+            }
+        }
     }
 }
