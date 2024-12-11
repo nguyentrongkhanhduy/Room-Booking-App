@@ -4,6 +4,7 @@ import android.location.Geocoder
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.renterapp.R
 import com.example.renterapp.databinding.PropertyDetailPopupLayoutBinding
 import com.example.renterapp.databinding.PropertyDetailRowLayoutBinding
 import com.example.renterapp.model.Property
@@ -30,6 +31,10 @@ class PropertyAdapter(val propertyList: MutableList<Property>, val geocoder: Geo
 
         holder.binding.tvDescription.text = curProperty.description
         holder.binding.tvPrice.text = "$${curProperty.price} CAD"
+        holder.binding.tvBedrooms.text = "${curProperty.bedrooms} Bedrooms"
+        holder.binding.tvStatus.text = if(curProperty.isAvailable) "Available" else "Unavailable"
+        holder.binding.tvStatus.setTextColor(if(curProperty.isAvailable) holder.binding.root.context.getColor(
+            R.color.green) else holder.binding.root.context.getColor(R.color.red))
 
         holder.binding.btnRemove.setOnClickListener {
             clickInterface.removeFromWishlist(curProperty.id)

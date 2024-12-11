@@ -176,6 +176,9 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
                 }
             }
         }
+            .addOnFailureListener {
+                Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
+            }
     }
 
     private fun checkFavourite(): Boolean {
@@ -193,6 +196,8 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         val description = customDialog.findViewById<TextView>(R.id.tvDescription)
         val price = customDialog.findViewById<TextView>(R.id.tvPrice)
         val image = customDialog.findViewById<ImageView>(R.id.ivRoom)
+        val rooms = customDialog.findViewById<TextView>(R.id.tvBedrooms)
+        val availability = customDialog.findViewById<TextView>(R.id.tvStatus)
 
         val searchResult = geoCoder.getFromLocation(
             propertyListDisplay.get(position).location.latitude,
@@ -204,6 +209,9 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         }
         description.text = propertyListDisplay.get(position).description
         price.text = "$${propertyListDisplay.get(position).price} CAD"
+        rooms.text = "${propertyListDisplay.get(position).bedrooms} Bedrooms"
+        availability.text = if (propertyListDisplay.get(position).isAvailable) "Available" else "Unavailable"
+        availability.setTextColor(if (propertyListDisplay.get(position).isAvailable) resources.getColor(R.color.green) else resources.getColor(R.color.red))
 
         val btnDismiss = customDialog.findViewById<ImageButton>(R.id.btnClose)
         btnDismiss.setOnClickListener {

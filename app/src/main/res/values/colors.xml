@@ -4,4 +4,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="bnb_red">#cd3362</color>
     <color name="grey">#717171</color>
+    <color name="green">#008000</color>
+    <color name="red">#FF0000</color>
 </resources>

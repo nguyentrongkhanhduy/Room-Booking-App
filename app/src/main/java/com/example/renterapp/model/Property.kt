@@ -7,7 +7,10 @@ class Property(
     var id: String = "",
     var location: Location = Location(),
     var price: Double = 0.0,
-    var imgUlr: String = "",
+    var bedrooms: Int = 0,
+    var imgUrl: String = "",
     var description: String = "",
+    var isAvailable: Boolean = true,
+    var ownerId: String = ""
 ) {
 }

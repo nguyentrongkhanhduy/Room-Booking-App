@@ -60,11 +60,21 @@
             app:layout_constraintTop_toBottomOf="@+id/tvAddress" />
 
         <TextView
+            android:id="@+id/tvBedrooms"
+            android:layout_width="76dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/font_nunito_sans_regular"
+            android:text="3 Bedrooms"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="@+id/tvDescription"
+            app:layout_constraintTop_toBottomOf="@+id/tvDescription" />
+
+        <TextView
             android:id="@+id/tvPrice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:fontFamily="@font/font_nunito_sans_bold"
             android:text="$300 CAD"
@@ -72,18 +82,33 @@
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/ivRoom"
-            app:layout_constraintTop_toBottomOf="@+id/tvDescription" />
+            app:layout_constraintTop_toBottomOf="@+id/tvBedrooms" />
 
         <TextView
+            android:id="@+id/textView8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:fontFamily="@font/font_nunito_sans_regular"
-            android:text="night"
+            android:text="/ month"
             android:textColor="@color/black"
             android:textSize="16sp"
             app:layout_constraintBaseline_toBaselineOf="@+id/tvPrice"
             app:layout_constraintStart_toEndOf="@+id/tvPrice" />
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="57dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="6dp"
+            android:fontFamily="@font/font_nunito_sans_regular"
+            android:text="Available"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            app:layout_constraintBottom_toBottomOf="@+id/textView8"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView8" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

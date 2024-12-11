@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "120378320008",
+    "project_id": "mads4006-project",
+    "storage_bucket": "mads4006-project.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:120378320008:android:0fbc39ab30b80040fbab3d",
+        "android_client_info": {
+          "package_name": "com.example.landlord_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0JoaKdUMujx7Zn-MCSPXLyk56rWAEpjo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:120378320008:android:f866206ee1bb59f1fbab3d",
+        "android_client_info": {
+          "package_name": "com.example.renterapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0JoaKdUMujx7Zn-MCSPXLyk56rWAEpjo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
