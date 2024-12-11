@@ -5,14 +5,19 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import com.bumptech.glide.Glide
 import com.example.renterapp.databinding.ActivityMainBinding
 import com.example.renterapp.model.Location
 import com.example.renterapp.model.Property
@@ -49,6 +54,8 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         locationUtils = LocationUtils(this)
         location = Location()
         geoCoder = Geocoder(this, Locale.getDefault())
+        val etSearchPrice = findViewById<EditText>(R.id.etSearchPrice)
+        val btnFilter = findViewById<Button>(R.id.btnFilter)
 
         val checkLocationPermission = locationUtils.hasLocationPermission(this)
         if (!checkLocationPermission) {
@@ -58,6 +65,21 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         val mapFragment =
             supportFragmentManager.findFragmentById(R.id.fragMap) as SupportMapFragment
         mapFragment.getMapAsync(this)
+        btnFilter.setOnClickListener {
+            val maxPriceInput = etSearchPrice.text.toString()
+            val maxPrice = maxPriceInput.toDoubleOrNull() ?: 0.0 // Default to 0 if input is invalid
+            filterPropertiesByPrice(maxPrice)
+        }
+        etSearchPrice.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (s.isNullOrEmpty()) {
+                    getAllProperty() // Reset map if the search input is cleared
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
     }
 
     private fun requestLocationPermission() {
@@ -212,7 +234,11 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         rooms.text = "${propertyListDisplay.get(position).bedrooms} Bedrooms"
         availability.text = if (propertyListDisplay.get(position).isAvailable) "Available" else "Unavailable"
         availability.setTextColor(if (propertyListDisplay.get(position).isAvailable) resources.getColor(R.color.green) else resources.getColor(R.color.red))
-
+        Glide.with(image.context)
+            .load(propertyListDisplay.get(position).imgUrl)
+            .placeholder(R.drawable.ic_property_placeholder)
+            .error(R.drawable.ic_empty)
+            .into(image)
         val btnDismiss = customDialog.findViewById<ImageButton>(R.id.btnClose)
         btnDismiss.setOnClickListener {
             alertDialog.dismiss()
@@ -250,6 +276,25 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         alertDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         alertDialog.show()
+    }
+
+    private fun filterPropertiesByPrice(maxPrice: Double) {
+        googleMap.clear() // Clear existing markers
+        if (maxPrice == 0.0) {
+            // Reset map to show all properties
+            getAllProperty()
+            return
+        }
+
+        propertyListDisplay.filter { it.price <= maxPrice }.forEach { property ->
+            val latLngProperty =
+                LatLng(property.location.latitude, property.location.longitude)
+            val marker = googleMap.addMarker(
+                MarkerOptions().position(latLngProperty)
+                    .icon(locationUtils.createCustomMarker(this, "$${property.price} CAD"))
+            )
+            marker!!.tag = propertyListDisplay.indexOf(property)
+        }
     }
 
     private fun getCurrentUserInfo() {
