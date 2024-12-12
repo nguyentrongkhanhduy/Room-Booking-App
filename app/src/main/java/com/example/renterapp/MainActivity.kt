@@ -54,8 +54,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         locationUtils = LocationUtils(this)
         location = Location()
         geoCoder = Geocoder(this, Locale.getDefault())
-        val etSearchPrice = findViewById<EditText>(R.id.etSearchPrice)
-        val btnFilter = findViewById<Button>(R.id.btnFilter)
+
 
         val checkLocationPermission = locationUtils.hasLocationPermission(this)
         if (!checkLocationPermission) {
@@ -65,12 +64,12 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         val mapFragment =
             supportFragmentManager.findFragmentById(R.id.fragMap) as SupportMapFragment
         mapFragment.getMapAsync(this)
-        btnFilter.setOnClickListener {
-            val maxPriceInput = etSearchPrice.text.toString()
+        binding.btnFilter.setOnClickListener {
+            val maxPriceInput = binding.etSearchPrice.text.toString()
             val maxPrice = maxPriceInput.toDoubleOrNull() ?: 0.0 // Default to 0 if input is invalid
             filterPropertiesByPrice(maxPrice)
         }
-        etSearchPrice.addTextChangedListener(object : TextWatcher {
+        binding.etSearchPrice.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 if (s.isNullOrEmpty()) {
                     getAllProperty() // Reset map if the search input is cleared
@@ -125,7 +124,6 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
                     ).show()
                 }
             }
-
         }
     }
 
@@ -133,6 +131,11 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         super.onResume()
         setAppBarTitle()
         getCurrentUserInfo()
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        getAllProperty()
     }
 
     override fun setAppBarTitle() {
@@ -160,8 +163,8 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            googleMap.isMyLocationEnabled = true
-            googleMap.uiSettings.isMyLocationButtonEnabled = true
+//            googleMap.isMyLocationEnabled = true
+//            googleMap.uiSettings.isMyLocationButtonEnabled = true
             googleMap.uiSettings.isZoomControlsEnabled = true
 
             locationUtils.fetchCurrentLocation(location) {
@@ -180,7 +183,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
     private fun getAllProperty() {
         googleMap.clear()
         propertyListDisplay.clear()
-        db.collection("property").get().addOnSuccessListener {
+        db.collection("property").whereEqualTo("available", true).get().addOnSuccessListener {
             for (document in it) {
                 try {
                     val property = document.toObject(Property::class.java)
@@ -208,7 +211,8 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
     }
 
     private fun showProperty(position: Int) {
-        val customDialog = LayoutInflater.from(this).inflate(R.layout.property_detail_popup_layout, null)
+        val customDialog =
+            LayoutInflater.from(this).inflate(R.layout.property_detail_popup_layout, null)
 
         val alertDialog = AlertDialog.Builder(this)
             .setView(customDialog)
@@ -219,7 +223,6 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         val price = customDialog.findViewById<TextView>(R.id.tvPrice)
         val image = customDialog.findViewById<ImageView>(R.id.ivRoom)
         val rooms = customDialog.findViewById<TextView>(R.id.tvBedrooms)
-        val availability = customDialog.findViewById<TextView>(R.id.tvStatus)
 
         val searchResult = geoCoder.getFromLocation(
             propertyListDisplay.get(position).location.latitude,
@@ -232,8 +235,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
         description.text = propertyListDisplay.get(position).description
         price.text = "$${propertyListDisplay.get(position).price} CAD"
         rooms.text = "${propertyListDisplay.get(position).bedrooms} Bedrooms"
-        availability.text = if (propertyListDisplay.get(position).isAvailable) "Available" else "Unavailable"
-        availability.setTextColor(if (propertyListDisplay.get(position).isAvailable) resources.getColor(R.color.green) else resources.getColor(R.color.red))
+
         Glide.with(image.context)
             .load(propertyListDisplay.get(position).imgUrl)
             .placeholder(R.drawable.ic_property_placeholder)
@@ -246,7 +248,7 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
 
         val btnFavorite = customDialog.findViewById<ImageButton>(R.id.btnFavorite)
 
-        if(auth.currentUser != null){
+        if (auth.currentUser != null) {
             if (wishList.contains(propertyListDisplay.get(position).id)) {
                 btnFavorite.setImageResource(R.drawable.ic_fav_2)
             } else {
@@ -262,12 +264,14 @@ class MainActivity : BaseActivity(), OnMapReadyCallback {
                 if (wishList.contains(propertyListDisplay.get(position).id)) {
                     wishList.remove(propertyListDisplay.get(position).id)
                     btnFavorite.setImageResource(R.drawable.ic_fav)
-                    db.collection("user").document(auth.currentUser!!.uid).update("wishList", wishList)
+                    db.collection("user").document(auth.currentUser!!.uid)
+                        .update("wishList", wishList)
                     Toast.makeText(this, "Removed from Wishlist", Toast.LENGTH_SHORT).show()
                 } else {
                     wishList.add(propertyListDisplay.get(position).id)
                     btnFavorite.setImageResource(R.drawable.ic_fav_2)
-                    db.collection("user").document(auth.currentUser!!.uid).update("wishList", wishList)
+                    db.collection("user").document(auth.currentUser!!.uid)
+                        .update("wishList", wishList)
                     Toast.makeText(this, "Added to Wishlist", Toast.LENGTH_SHORT).show()
                 }
             }

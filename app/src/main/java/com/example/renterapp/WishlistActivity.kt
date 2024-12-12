@@ -24,7 +24,6 @@ class WishlistActivity : BaseActivity(), ClickInterface {
 
     val propertyListDisplay = mutableListOf<Property>()
     val wishList: MutableList<String> = mutableListOf()
-    val hashMap: MutableMap<String, Int> = HashMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,7 +82,6 @@ class WishlistActivity : BaseActivity(), ClickInterface {
                         val property = it.toObject(Property::class.java)
                         if(property!=null){
                             propertyListDisplay.add(property)
-                            hashMap[property.id] = propertyListDisplay.indexOf(property)
                             binding.rvProperty.adapter?.notifyDataSetChanged()
                         }
                     }
@@ -92,13 +90,12 @@ class WishlistActivity : BaseActivity(), ClickInterface {
         }
     }
 
-    override fun removeFromWishlist(propertyId: String) {
+    override fun removeFromWishlist(propertyId: String, position: Int) {
         wishList.remove(propertyId)
         db.collection("user").document(auth.currentUser!!.uid).update("wishList", wishList)
-        propertyListDisplay.removeAt(hashMap[propertyId]!!)
-        binding.rvProperty.adapter?.notifyItemRemoved(hashMap[propertyId]!!)
-        binding.rvProperty.adapter?.notifyItemRangeChanged(hashMap[propertyId]!!, propertyListDisplay.size)
-        hashMap.remove(propertyId)
+        propertyListDisplay.removeAt(position)
+        binding.rvProperty.adapter?.notifyItemRemoved(position)
+        binding.rvProperty.adapter?.notifyItemRangeChanged(position, propertyListDisplay.size)
         Toast.makeText(this, "Removed from wishlist", Toast.LENGTH_SHORT).show()
     }
 }

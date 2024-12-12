@@ -44,7 +44,7 @@ class PropertyAdapter(val propertyList: MutableList<Property>, val geocoder: Geo
             .into(holder.binding.ivRoom)
 
         holder.binding.btnRemove.setOnClickListener {
-            clickInterface.removeFromWishlist(curProperty.id)
+            clickInterface.removeFromWishlist(curProperty.id, position)
         }
     }
 }
